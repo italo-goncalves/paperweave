@@ -25,7 +25,9 @@ export const DEFAULT_LAYOUT: LayoutModel = {
   hidden: [],
 };
 
-const STORAGE_KEY = "graph-doc-layout-v1";
+const STORAGE_KEY = "paperweave-layout-v1";
+/** Key used before the app was renamed; read once so a saved layout survives. */
+const OLD_STORAGE_KEY = "graph-doc-layout-v1";
 
 function isValid(m: unknown): m is LayoutModel {
   const l = m as LayoutModel;
@@ -37,7 +39,7 @@ function isValid(m: unknown): m is LayoutModel {
 export function useLayout() {
   const [layout, setLayout] = useState<LayoutModel>(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(OLD_STORAGE_KEY) ?? "null");
       if (isValid(saved)) return saved;
     } catch {
       /* storage unavailable or corrupt: fall back to default */

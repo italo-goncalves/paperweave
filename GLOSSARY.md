@@ -1,4 +1,4 @@
-# Graph-doc
+# PaperWeave
 
 A non-linear form of academic text: a single academic work presented as a graph of typed nodes that a reader navigates selectively, at a detail level they choose, instead of reading front to back.
 

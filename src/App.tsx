@@ -24,7 +24,7 @@ function Shell() {
   const [layout, setLayout] = useLayout();
 
   useEffect(() => {
-    document.title = `${work.title} · Graph-doc`;
+    document.title = `${work.title} · PaperWeave`;
   }, [work.title]);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ function Shell() {
   return (
     <div className="app">
       <header className="topbar">
-        <span className="brand">Graph-doc</span>
+        <span className="brand">PaperWeave</span>
         <span className="topbar-work" title={work.title}>{work.title}</span>
         <div className="topbar-controls">
           <label className="ctl">

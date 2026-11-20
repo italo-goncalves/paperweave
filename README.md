@@ -1,6 +1,6 @@
-# Graph-doc
+# PaperWeave
 
-A prototype of non-linear academic text: a Work is a graph of typed Nodes that a Reader navigates selectively, at a Detail tier they choose. Vocabulary is in [GLOSSARY.md](GLOSSARY.md), the file format in [docs/work-format.md](docs/work-format.md), and decisions in [docs/adr/](docs/adr/).
+A prototype of non-linear academic text: a Work is a graph of typed Nodes that a Reader navigates selectively, at a Detail tier they choose. Vocabulary is in [GLOSSARY.md](GLOSSARY.md), the file format in [docs/work-format.md](docs/work-format.md), decisions in [docs/adr/](docs/adr/), and similar projects in [docs/related-work.md](docs/related-work.md).
 
 ## Run
 
