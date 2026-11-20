@@ -5,7 +5,7 @@ Each Work is stored as a folder. The reading app loads the folder as-is; it is n
 ```
 works/<work-id>/
 ├── manifest.yaml      # title, authors, Abstract, Result order, Conclusion, Figures
-├── references.yaml    # citation key → formatted reference
+├── references.yaml    # citation key → reference fields
 ├── figures/           # image files that Figures point to
 └── nodes/
     └── <node-id>.md   # one file per Node
@@ -24,10 +24,29 @@ abstract: |
   Markdown text.
 results: [result-vein, result-gold, result-solar]   # Results list order, set by the author
 conclusion: conclusion
+order: [context-intro, gp-node, ...]   # optional: every Node id in Paper order (ADR 0003)
 figures:
   fig-vein:
     file: figures/vein.jpg
     caption: Markdown caption.
+```
+
+- **`order`** is optional. When it is missing, the Paper order is computed: Context, Concepts (each followed by its Primers), Methods, Results, Discussions, Conclusion; within a type, what a Node depends on comes first. When present, it must list every Node once and follow that grouping. LaTeX → Work always writes it.
+
+## references.yaml
+
+One entry per citation key, with BibTeX-like fields (ADR 0004). The citation label and the formatted text are not stored; PaperWeave's author-year style derives them.
+
+```yaml
+Damianou2013:
+  type: inproceedings        # article | inproceedings | incollection | book | thesis | report | misc
+  author: ["Damianou, Andreas C.", "Lawrence, Neil D."]   # "Family, Given", in order
+  year: 2013
+  title: Deep Gaussian processes
+  booktitle: International Conference on Artificial Intelligence and Statistics
+  volume: 31
+  pages: 207–215
+  doi: https://doi.org/...   # optional
 ```
 
 ## Node files

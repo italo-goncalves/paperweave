@@ -96,17 +96,31 @@ _Avoid_: Details, expanded
 A person navigating a Work.
 _Avoid_: User, viewer
 
-**Reading order**:
-The order of a Work's Nodes implied by their Edges, branching from Context to the Conclusion: what a Node depends on comes before it, and what situates it comes before it, while what discusses or synthesises it comes after.
-_Avoid_: Section order, sequence
+**Paper order**:
+The single linear order of a Work's Nodes: Context, then Concepts (each followed by its Primers), Methods, Results, Discussions and the Conclusion. Within a type, what a Node depends on comes first. A Work written in LaTeX keeps the order in which its Nodes were written, which must follow the same grouping by type.
+_Avoid_: Reading order, section order, sequence
 
 **Trail**:
-The Nodes a Reader has opened in the Reading panel, kept in Reading order, each at its own Detail tier.
+The Nodes a Reader has opened in the Reading panel, kept in Paper order, each at its own Detail tier.
 _Avoid_: History, breadcrumb, path
 
 **Neighbourhood**:
 The most recently opened Node together with the Nodes one Edge away from it, which the Graph map highlights while dimming the rest.
 _Avoid_: Subgraph, local view
+
+### Forms
+
+**Work format**:
+The files that hold a Work (a manifest, references, Figures and one file per Node); the hub that the other forms convert to and from.
+_Avoid_: Source, export
+
+**PaperWeave class**:
+The LaTeX class in which a Work is written as a LaTeX document, converting to and from the Work format.
+_Avoid_: Template, style
+
+**Linear version**:
+The PDF compiled from a LaTeX document in the PaperWeave class: a standalone linear rendering of a Work's graph, not shaped to any journal's policies.
+_Avoid_: Print version, paper, manuscript
 
 ### Layout
 
