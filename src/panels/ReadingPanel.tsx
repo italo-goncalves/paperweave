@@ -11,8 +11,16 @@ export function ReadingPanel() {
 
   useEffect(() => {
     if (!state.activeId || !scroller.current) return;
-    const el = scroller.current.querySelector(`[data-card="${state.activeId}"]`);
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const card = scroller.current.querySelector(`[data-card="${state.activeId}"]`);
+    const eq = state.anchor ? card?.querySelector<HTMLElement>(`[data-eq-anchor="${state.anchor}"]`) : null;
+    if (eq) {
+      eq.scrollIntoView({ behavior: "smooth", block: "center" });
+      eq.classList.remove("eq-flash");
+      void eq.offsetWidth; // restart the animation
+      eq.classList.add("eq-flash");
+    } else {
+      card?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
     // Only scroll when a Node is opened, not on every focus change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.scrollTick]);

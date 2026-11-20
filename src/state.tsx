@@ -15,12 +15,14 @@ export interface ReaderState {
   activeId: string | null;
   /** Incremented to ask the Reading panel to scroll to `activeId`. */
   scrollTick: number;
+  /** An Equation label inside `activeId` to scroll to and highlight, if any. */
+  anchor: string | null;
   figureMode: "trail" | "all";
   lightbox: string | null;
 }
 
 export type Action =
-  | { type: "open"; id: string; fresh?: boolean }
+  | { type: "open"; id: string; fresh?: boolean; tier?: Tier; anchor?: string }
   | { type: "close"; id: string }
   | { type: "focus"; id: string }
   | { type: "setTier"; id: string; tier: Tier | null }
@@ -34,17 +36,18 @@ function reducer(s: ReaderState, a: Action, rank: Record<string, number>): Reade
   switch (a.type) {
     case "open": {
       const existing = s.trail.findIndex((t) => t.id === a.id);
+      const moved = { activeId: a.id, scrollTick: s.scrollTick + 1, anchor: a.anchor ?? null };
       if (a.fresh) {
-        return { ...s, trail: [{ id: a.id, tier: null, collapsed: false }], activeId: a.id, scrollTick: s.scrollTick + 1 };
+        return { ...s, ...moved, trail: [{ id: a.id, tier: a.tier ?? null, collapsed: false }] };
       }
       if (existing >= 0) {
-        const trail = s.trail.map((t, i) => (i === existing ? { ...t, collapsed: false } : t));
-        return { ...s, trail, activeId: a.id, scrollTick: s.scrollTick + 1 };
+        const trail = s.trail.map((t, i) => (i === existing ? { ...t, tier: a.tier ?? t.tier, collapsed: false } : t));
+        return { ...s, ...moved, trail };
       }
       // The Trail is kept in Paper order, so a new Node lands where it sits in the Work.
-      const item: TrailItem = { id: a.id, tier: null, collapsed: false };
+      const item: TrailItem = { id: a.id, tier: a.tier ?? null, collapsed: false };
       const trail = [...s.trail, item].sort((p, q) => (rank[p.id] ?? 0) - (rank[q.id] ?? 0));
-      return { ...s, trail, activeId: a.id, scrollTick: s.scrollTick + 1 };
+      return { ...s, ...moved, trail };
     }
     case "close": {
       const idx = s.trail.findIndex((t) => t.id === a.id);
@@ -75,6 +78,7 @@ const initial: ReaderState = {
   globalTier: "summary",
   activeId: null,
   scrollTick: 0,
+  anchor: null,
   figureMode: "trail",
   lightbox: null,
 };

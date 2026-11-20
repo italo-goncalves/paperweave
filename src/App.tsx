@@ -6,6 +6,7 @@ import { ResultsList } from "./panels/ResultsList";
 import { ReadingPanel } from "./panels/ReadingPanel";
 import { GraphMap } from "./panels/GraphMap";
 import { FigurePanel, Lightbox } from "./panels/FigurePanel";
+import { EquationPopover } from "./panels/EquationPopover";
 
 const TIER_LABELS: Record<Tier, string> = { gist: "Gist", summary: "Summary", full: "Full" };
 
@@ -111,6 +112,7 @@ function Shell({ onChooseWork }: { onChooseWork: (id: string) => void }) {
       </header>
       <PanelLayout layout={layout} setLayout={setLayout} render={render} />
       <Lightbox />
+      <EquationPopover />
     </div>
   );
 }

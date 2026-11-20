@@ -18,17 +18,25 @@ function citation(work: Work, key: string, narrative: boolean): string {
 }
 
 interface Placeholders {
-  math: { tex: string; display: boolean }[];
+  math: { tex: string; display: boolean; label?: string }[];
   figures: string[];
 }
 
 function preprocess(work: Work, src: string, ph: Placeholders): string {
   let s = src.replace(/\r\n/g, "\n");
 
-  // Math first, so nothing inside it is touched by later steps.
-  s = s.replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => {
-    ph.math.push({ tex, display: true });
+  // Math first, so nothing inside it is touched by later steps. A display equation
+  // may carry an Equation label: $$…$$ {#eq-name}.
+  s = s.replace(/\$\$([\s\S]+?)\$\$(?:[ \t]*\{#(eq-[a-z0-9-]+)\})?/g, (_, tex, label) => {
+    ph.math.push({ tex, display: true, label });
     return `\n\nMATHPH${ph.math.length - 1}X\n\n`;
+  });
+
+  // References to labelled equations: [[#eq-name]] shows as "(3)".
+  s = s.replace(/\[\[#(eq-[a-z0-9-]+)\]\]/g, (_, label) => {
+    const eq = work.equations[label];
+    if (!eq) return `<span class="eq-ref eq-ref-missing">(${escapeHtml(label)})</span>`;
+    return `<a class="eq-ref" data-eq="${label}" href="#${label}">(${eq.number})</a>`;
   });
   s = s.replace(/\$([^$\n]+?)\$/g, (_, tex) => {
     ph.math.push({ tex, display: false });
@@ -70,7 +78,7 @@ function preprocess(work: Work, src: string, ph: Placeholders): string {
   return s;
 }
 
-function renderMath(tex: string, display: boolean): string {
+export function renderMath(tex: string, display: boolean): string {
   try {
     return katex.renderToString(tex, { displayMode: display, throwOnError: false, strict: "ignore" });
   } catch {
@@ -82,7 +90,9 @@ function postprocess(work: Work, html: string, ph: Placeholders): string {
   html = html.replace(/<p>FIGPH(\d+)X<\/p>/g, (_, i) => figureHtml(work, ph.figures[Number(i)]));
   html = html.replace(/<p>MATHPH(\d+)X<\/p>/g, (_, i) => {
     const m = ph.math[Number(i)];
-    return `<div class="math-display">${renderMath(m.tex, true)}</div>`;
+    const eq = m.label ? work.equations[m.label] : undefined;
+    if (!eq) return `<div class="math-display">${renderMath(m.tex, true)}</div>`;
+    return `<div class="math-display math-numbered" data-eq-anchor="${eq.label}">${renderMath(m.tex, true)}<span class="eq-number">(${eq.number})</span></div>`;
   });
   html = html.replace(/MATHPH(\d+)X/g, (_, i) => {
     const m = ph.math[Number(i)];

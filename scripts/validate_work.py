@@ -28,6 +28,9 @@ TIERS = ["Gist", "Summary", "Full"]
 INLINE = re.compile(r"(?<!!)\[\[([a-z0-9-]+)(?:\|[^\]]*)?\]\]")
 FIGURE = re.compile(r"!\[\[([a-z0-9-]+)\]\]")
 CITE = re.compile(r"@([A-Za-z][A-Za-z0-9_-]*[A-Za-z0-9])")
+EQ_LABEL = re.compile(r"\$\$(.+?)\$\$[ \t]*\{#([^}]*)\}", re.S)
+EQ_REF = re.compile(r"\[\[#([^\]|]*)\]\]")
+LABEL_NAME = re.compile(r"eq-[a-z0-9-]+")
 
 
 def load_node(path):
@@ -59,6 +62,18 @@ def main(work_dir):
         nodes[path.stem] = (meta, body)
 
     used_figures, used_refs, incoming = set(), set(), {n: 0 for n in nodes}
+
+    # Equation labels: unique within the Work; one Node may repeat its own label across tiers.
+    eq_owner = {}
+    for nid, (meta, body) in nodes.items():
+        if nid.startswith("eq-"):
+            errors.append(f"{nid}: Node ids may not start with 'eq-' (reserved for Equation labels)")
+        for tex, label in EQ_LABEL.findall(body):
+            if not LABEL_NAME.fullmatch(label):
+                errors.append(f"{nid}: equation label '{label}' must look like eq-name")
+            elif eq_owner.get(label, nid) != nid:
+                errors.append(f"{nid}: equation label {label} is already used in {eq_owner[label]}")
+            eq_owner.setdefault(label, nid)
 
     for nid, (meta, body) in nodes.items():
         ntype = meta.get("type")
@@ -101,6 +116,14 @@ def main(work_dir):
                 reverse = any(nid in ts for ts in (nodes[link][0].get("edges") or {}).values())
                 if not reverse:
                     notes.append(f"{nid}: inline link to {link} has no Edge in either direction")
+        for label in sorted(set(EQ_REF.findall(body))):
+            owner = eq_owner.get(label)
+            if owner is None:
+                errors.append(f"{nid}: reference to missing equation label '{label}'")
+            elif owner != nid and owner not in edge_targets:
+                reverse = any(nid in ts for ts in (nodes[owner][0].get("edges") or {}).values())
+                if not reverse:
+                    notes.append(f"{nid}: refers to {label} in {owner}, with no Edge in either direction")
         for fig in FIGURE.findall(body):
             if fig not in figures:
                 errors.append(f"{nid}: figure '{fig}' not in manifest")

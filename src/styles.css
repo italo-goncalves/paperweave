@@ -226,3 +226,18 @@ a { color: var(--type-method); }
   .splitter { display: none; }
   .drop-empty { display: none; }
 }
+
+/* Equation labels: numbered display equations, references and their popover. */
+.math-numbered { position: relative; padding-right: 3.5em; border-radius: 4px; }
+.eq-number { position: absolute; right: 0.4em; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.eq-ref { white-space: nowrap; }
+.eq-ref-missing { color: #b91c1c; }
+.eq-flash { animation: eq-flash 1.6s ease-out; }
+@keyframes eq-flash { from { background: color-mix(in srgb, var(--type-method) 22%, transparent); } to { background: transparent; } }
+.eq-popover {
+  position: fixed; z-index: 50; max-width: min(90vw, 640px); pointer-events: none;
+  background: var(--bg-panel); color: inherit; border: 1px solid var(--border);
+  border-radius: 6px; box-shadow: 0 6px 24px rgb(0 0 0 / 0.18); padding: 0.4em 0.9em 0.5em;
+}
+.eq-popover .katex-display { margin: 0.4em 0; }
+.eq-popover-meta { font-size: 0.8em; color: var(--text-muted); }

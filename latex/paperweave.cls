@@ -168,13 +168,21 @@
   \global\let\pw@gist\@empty\global\let\pw@summary\@undefined\global\let\pw@full\@undefined
   \ifpw@suppress\else\pw@heading\fi}
 
+%% At the end of a Node: print the chosen tier (the requested one, or the next shorter one
+%% that exists), and run the other tiers through a discarded box, in tier order, so that
+%% equation numbers are the same whichever tier is printed.
+\newcount\pw@choice
 \newcommand\pw@end{%
+  \pw@choice=0
   \ifpw@suppress\else
-    \ifnum\pw@tiernum>2 \ifdefined\pw@full \pw@body\pw@full \else \pw@summaryifwanted\fi
-    \else \pw@summaryifwanted \fi
-  \fi}
-\def\pw@summaryifwanted{\ifnum\pw@tiernum>1 \ifdefined\pw@summary \pw@body\pw@summary\fi\fi}
+    \ifnum\pw@tiernum>2 \ifdefined\pw@full \pw@choice=2 \fi\fi
+    \ifnum\pw@choice=0 \ifnum\pw@tiernum>1 \ifdefined\pw@summary \pw@choice=1 \fi\fi\fi
+  \fi
+  \ifdefined\pw@summary \ifnum\pw@choice=1 \pw@body\pw@summary\else\pw@discard\pw@summary\fi\fi
+  \ifdefined\pw@full \ifnum\pw@choice=2 \pw@body\pw@full\else\pw@discard\pw@full\fi\fi}
 \def\pw@body#1{\par\nobreak #1\par}
+\newif\ifpw@discarding
+\def\pw@discard#1{\setbox\z@\vbox{\pw@discardingtrue #1}}
 
 \newcommand\gist[1]{%
   \pw@auxwrite\pw@setgist{\pw@id}{#1}%
@@ -194,7 +202,7 @@
 \NewDocumentEnvironment{primer}{O{} m m}
   {\pw@checkorder{primer}{#2}\def\pw@type{primer}\def\pw@id{#2}\pw@contributionfalse
    \pw@auxwrite\pw@settitle{#2}{#3}\expandafter\gdef\csname pw@t@#2\endcsname{#3}%
-   \ifpw@suppress\pw@auxwrite\pw@setsuppressed{#2}{}\setbox0\vbox\bgroup
+   \ifpw@suppress\pw@auxwrite\pw@setsuppressed{#2}{}\setbox0\vbox\bgroup\pw@discardingtrue
    \else\begin{pw@primerbox}\hypertarget{node:#2}{}%
      {\small\sffamily\bfseries\color{pw@primer}PRIMER}\par\nobreak
      {\large\bfseries\boldmath #3\par}\nobreak\fi}
@@ -204,6 +212,41 @@
   \ifpw@noprimers\pw@suppresstrue\fi
   \input{primers/#1}%
   \pw@suppressfalse}
+
+%% ---- Numbered equations (Equation labels) ----------------------------------
+%% \begin{equation}\label{eq-x} ... \end{equation}, with the label first. Numbers run
+%% across the Work in Paper order, counted in every tier whether printed or not, as in
+%% the app; an equation repeated in another tier of its Node keeps its number.
+\newcount\pw@eqcount
+\newcommand\pw@seteq[2]{\expandafter\gdef\csname pw@eqn@#1\endcsname{#2}}
+\newcommand\pw@seteqshown[2]{\expandafter\gdef\csname pw@eqs@#1\endcsname{}}
+\AtBeginDocument{%
+  \immediate\write\@auxout{\string\providecommand\string\pw@seteq[2]{}}%
+  \immediate\write\@auxout{\string\providecommand\string\pw@seteqshown[2]{}}}
+\RenewEnviron{equation}{\expandafter\pw@equation\BODY\pw@endeq}
+\long\def\pw@equation#1#2\pw@endeq{%
+  \ifx\label#1\else
+    \ClassError{paperweave}{A numbered equation must start with \string\label{eq-...}}{Unlabelled equations are written \string\[ ... \string\].}%
+  \fi
+  \pw@numbered#2\pw@endeq}
+\long\def\pw@numbered#1#2\pw@endeq{% {label} body
+  \ifcsname pw@eqnl@#1\endcsname\else
+    \global\advance\pw@eqcount\@ne
+    \expandafter\xdef\csname pw@eqnl@#1\endcsname{\the\pw@eqcount}%
+    \immediate\write\@auxout{\string\pw@seteq{#1}{\the\pw@eqcount}}%
+  \fi
+  \edef\pw@n{\csname pw@eqnl@#1\endcsname}%
+  \let\pw@anchor\@empty
+  \ifpw@discarding\else\ifcsname pw@eqsl@#1\endcsname\else
+    \expandafter\gdef\csname pw@eqsl@#1\endcsname{}%
+    \immediate\write\@auxout{\string\pw@seteqshown{#1}{}}%
+    \def\pw@anchor{\hypertarget{eq:#1}{}}%
+  \fi\fi
+  \[#2\tag{\pw@anchor\pw@n}\]}
+\renewcommand\eqref[1]{%
+  \ifcsname pw@eqn@#1\endcsname
+    (\ifcsname pw@eqs@#1\endcsname\hyperlink{eq:#1}{\csname pw@eqn@#1\endcsname}\else\csname pw@eqn@#1\endcsname\fi)%
+  \else (\textbf{??})\ClassWarning{paperweave}{Unknown equation `#1' (rerun LaTeX?)}\fi}
 
 %% ---- Edges -----------------------------------------------------------------
 \ExplSyntaxOn

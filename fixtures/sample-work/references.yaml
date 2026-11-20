@@ -1,0 +1,34 @@
+Doe2019:
+  type: inproceedings
+  author: ['Doe, Jane', 'Roe, Richard']
+  editor: ['Editor, Ed']
+  year: 2019
+  title: A conference paper with 100% coverage
+  booktitle: Proceedings of the Sample Conference
+  volume: '7'
+  pages: 10–20
+  doi: 10.0000/conf_2019
+Org2021:
+  type: report
+  author: [Sample Organisation]
+  year: 2021
+  title: An organisational report
+  institution: Sample Institute
+  number: TR-1
+Smith2020a:
+  type: article
+  author: ['Smith, John', 'Doe, Jane', 'Roe, Richard']
+  year: 2020
+  title: Apples and oranges
+  journal: Journal of Samples
+  volume: '12'
+  number: '3'
+  pages: 1–9
+Smith2020b:
+  type: book
+  author: ['Smith, John', 'Other, Ann', 'Third, Tim']
+  year: 2020
+  title: Zebra stripes
+  edition: 2nd
+  publisher: Sample Press
+  address: Nowhere

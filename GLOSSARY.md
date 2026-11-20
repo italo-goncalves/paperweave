@@ -34,6 +34,10 @@ _Avoid_: Novelty node
 A figure or table embedded in a Node's content that can also be shown on its own; not a Node.
 _Avoid_: Figure node, asset
 
+**Equation label**:
+An author-chosen name that numbers a display equation and lets other Nodes refer to it; numbers run across the Work in Paper order.
+_Avoid_: Equation tag, anchor
+
 ### Edge types
 
 **uses**: Result or Method → Method.

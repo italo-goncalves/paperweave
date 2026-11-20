@@ -2,6 +2,7 @@ import yaml from "js-yaml";
 import { layoutWork, type GraphLayout } from "./graphLayout";
 import { paperOrder } from "./paperOrder";
 import { formatReferences, type ReferenceFields } from "./references";
+import { numberEquations, type Equation } from "./equations";
 
 export const NODE_TYPES = ["result", "method", "concept", "primer", "context", "discussion", "conclusion"] as const;
 export type NodeType = (typeof NODE_TYPES)[number];
@@ -82,6 +83,8 @@ export interface Work {
   /** All Node ids in Paper order, and the index of each. */
   paperOrder: string[];
   paperRank: Record<string, number>;
+  /** Labelled display equations by label, numbered across the Work. */
+  equations: Record<string, Equation>;
   /** Fixed Graph map positions. */
   layout: GraphLayout;
 }
@@ -141,7 +144,7 @@ function loadWork(dir: string): Work {
     figures[id] = { id, url: figureFiles[`${dir}/${f.file}`] ?? "", caption: f.caption ?? "" };
   }
 
-  const work: Omit<Work, "layout" | "paperOrder" | "paperRank"> = {
+  const work: Omit<Work, "layout" | "paperOrder" | "paperRank" | "equations"> = {
     id: manifest.id,
     title: manifest.title,
     authors: manifest.authors ?? [],
@@ -160,7 +163,8 @@ function loadWork(dir: string): Work {
   };
   const order = paperOrder(work);
   const paperRank = Object.fromEntries(order.map((id, i) => [id, i]));
-  return { ...work, paperOrder: order, paperRank, layout: layoutWork(work as Work) };
+  const equations = numberEquations(nodes, order);
+  return { ...work, paperOrder: order, paperRank, equations, layout: layoutWork(work as Work) };
 }
 
 export const works: Work[] = Object.keys(manifests)

@@ -12,6 +12,8 @@ Each construct has exactly one LaTeX form, so LaTeX → Work can invert it (ADR 
   **b** / *e*             \\textbf{b} / \\emph{e}
   <url> / [text](url)     \\autolink{url} / \\href{url}{text}
   $…$ / $$…$$             $…$ / \\[…\\], contents untouched
+  $$…$$ {#eq-x}           \\begin{equation}\\label{eq-x}…\\end{equation}
+  [[#eq-x]]               \\eqref{eq-x}
 
 Anything else in a body is an error, never dropped silently.
 """
@@ -23,7 +25,8 @@ SPECIALS = {"\\": r"\textbackslash{}", "{": r"\{", "}": r"\}", "%": r"\%", "&": 
 URL_SPECIALS = {"%": r"\%", "#": r"\#", "\\": r"\textbackslash{}", "{": r"\{", "}": r"\}"}
 
 INLINE = re.compile(
-    r"(?P<link>\[\[(?P<lid>[a-z0-9-]+)(?:\|(?P<ltext>[^\]]*))?\]\])"
+    r"(?P<eqref>\[\[#(?P<eqlabel>eq-[a-z0-9-]+)\]\])"
+    r"|(?P<link>\[\[(?P<lid>[a-z0-9-]+)(?:\|(?P<ltext>[^\]]*))?\]\])"
     r"|(?P<citep>\[(?P<ckeys>@" + KEY + r"(?:;\s*@" + KEY + r")*)\])"
     r"|(?P<citet>(?:(?<=^)|(?<=[\s(]))@(?P<tkey>" + KEY + r"))"
     r"|(?P<auto><(?P<aurl>https?://[^>\s]+)>)"
@@ -31,7 +34,7 @@ INLINE = re.compile(
     r"|(?P<bold>\*\*(?P<btext>.+?)\*\*)"
     r"|(?P<em>(?<![*\w])\*(?P<etext>[^*\s](?:[^*]*?[^*\s])?)\*(?![*\w]))"
 )
-MATH = re.compile(r"\$\$(?P<d>.+?)\$\$|\$(?P<i>[^$\n]+?)\$", re.S)
+MATH = re.compile(r"\$\$(?P<d>.+?)\$\$(?:[ \t]*\{#(?P<label>eq-[a-z0-9-]+)\})?|\$(?P<i>[^$\n]+?)\$", re.S)
 
 
 class FormatError(ValueError):
@@ -59,7 +62,9 @@ def _inline(text):
     for m in INLINE.finditer(text):
         out.append(escape(text[i:m.start()]))
         i = m.end()
-        if m["link"]:
+        if m["eqref"]:
+            out.append(f"\\eqref{{{m['eqlabel']}}}")
+        elif m["link"]:
             t = m["ltext"]
             out.append(f"\\nodelink{{{m['lid']}}}" if t is None else f"\\nodelink[{_inline(t)}]{{{m['lid']}}}")
         elif m["citep"]:
@@ -84,7 +89,12 @@ def _protect_math(text):
     spans = []
 
     def repl(m):
-        spans.append(f"\\[{m['d']}\\]" if m["d"] is not None else f"${m['i']}$")
+        if m["label"]:
+            spans.append(f"\\begin{{equation}}\\label{{{m['label']}}}{m['d']}\\end{{equation}}")
+        elif m["d"] is not None:
+            spans.append(f"\\[{m['d']}\\]")
+        else:
+            spans.append(f"${m['i']}$")
         return f"\x00{len(spans) - 1}\x00"
 
     return MATH.sub(repl, text), spans

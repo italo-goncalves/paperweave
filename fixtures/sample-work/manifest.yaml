@@ -1,0 +1,18 @@
+id: sample-work
+title: A sample Work for PaperWeave's tests
+authors: [Ada Example, Jean-Paul Muñoz]
+year: 2026
+venue: PaperWeave fixtures
+doi: https://doi.org/10.0000/example
+code: https://example.org/code#readme
+keywords: [Testing, Round trips]
+abstract: |
+  This Work exists to exercise every construct of the Work format: tiers, Edges, Primers, *emphasis*, **bold**, lists, tables, Figures, citations [@Smith2020a], and labelled equations.
+
+  It has a second paragraph with 50% of the "quoted" text and an_underscore.
+results: [result-main, result-side]
+conclusion: conclusion
+figures:
+  fig-sample:
+    file: figures/sample.png
+    caption: A sample Figure, cited as @Smith2020b.
