@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:5173. Every Work under `works/` is bundled in; the app currently shows the first one.
+Then open http://localhost:5173. Every Work under `works/` is bundled in; the app currently shows the first one. `works/` and `tools/` are not versioned (see `.gitignore`), so a fresh clone has no Work to show until you add one.
 
 Check a Work after editing its files:
 

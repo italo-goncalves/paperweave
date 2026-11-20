@@ -10,3 +10,7 @@ dist/
 
 # Original paper sources: kept locally, not versioned
 sources/
+
+# Works and conversion tools: kept locally, not versioned
+works/
+tools/
