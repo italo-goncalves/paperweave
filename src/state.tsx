@@ -41,7 +41,7 @@ function reducer(s: ReaderState, a: Action, rank: Record<string, number>): Reade
         const trail = s.trail.map((t, i) => (i === existing ? { ...t, collapsed: false } : t));
         return { ...s, trail, activeId: a.id, scrollTick: s.scrollTick + 1 };
       }
-      // The Trail is kept in Reading order, so a new Node lands where it sits in the graph.
+      // The Trail is kept in Paper order, so a new Node lands where it sits in the Work.
       const item: TrailItem = { id: a.id, tier: null, collapsed: false };
       const trail = [...s.trail, item].sort((p, q) => (rank[p.id] ?? 0) - (rank[q.id] ?? 0));
       return { ...s, trail, activeId: a.id, scrollTick: s.scrollTick + 1 };
@@ -82,7 +82,7 @@ const initial: ReaderState = {
 const Ctx = createContext<{ work: Work; state: ReaderState; dispatch: Dispatch<Action> } | null>(null);
 
 export function ReaderProvider({ work, children }: { work: Work; children: ReactNode }) {
-  const [state, dispatch] = useReducer((s: ReaderState, a: Action) => reducer(s, a, work.layout.rank), initial);
+  const [state, dispatch] = useReducer((s: ReaderState, a: Action) => reducer(s, a, work.paperRank), initial);
   return <Ctx.Provider value={{ work, state, dispatch }}>{children}</Ctx.Provider>;
 }
 

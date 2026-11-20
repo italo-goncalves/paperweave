@@ -205,7 +205,7 @@ export function GraphMap() {
         <span>
           {active
             ? `“${plainTitle(active.title)}” and its ${(focus?.size ?? 1) - 1} neighbours`
-            : `${Object.keys(work.nodes).length} Nodes in Reading order, from Context to Conclusion`}
+            : `${Object.keys(work.nodes).length} Nodes, layered from Context to the Conclusion`}
         </span>
         {active && (
           <button className="link-btn" onClick={() => dispatch({ type: "clearTrail" })} title="Clear the Trail and the highlight">

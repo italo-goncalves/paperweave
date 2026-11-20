@@ -1,5 +1,6 @@
 /**
- * Layered (Sugiyama-style) layout of a Work in Reading order.
+ * Layered (Sugiyama-style) layout of a Work for the Graph map. The layers follow the
+ * Edges; the Trail uses the Paper order instead (src/paperOrder.ts, ADR 0003).
  *
  * 1. Each Edge is turned into a "comes before" pair (see `precedence`).
  * 2. Nodes get layers: Context at the top, the Conclusion alone at the bottom, and
@@ -20,7 +21,7 @@ export interface Point {
 export interface GraphLayout {
   pos: Record<string, Point>;
   layer: Record<string, number>;
-  /** All Node ids in Reading order: by layer, then left to right. */
+  /** All Node ids by layer, then left to right. */
   order: string[];
   /** Index of each Node in `order`. */
   rank: Record<string, number>;
@@ -34,7 +35,7 @@ const LAYER_GAP = 105;
 const NODE_GAP = 128;
 const DUMMY_GAP = 28;
 
-/** [before, after] for an Edge in Reading order. */
+/** [before, after] for an Edge, top to bottom in the Graph map. */
 export function precedence(e: Edge): [string, string] {
   switch (e.type) {
     case "explains": // a Primer is read before the Concept it explains
@@ -74,7 +75,7 @@ export function layoutWork(work: Work, { restarts = 24, sweeps = 12 } = {}): Gra
     let next = ids.find((id) => !done.has(id) && indeg.get(id) === 0);
     if (!next) {
       next = ids.filter((id) => !done.has(id)).sort((x, y) => indeg.get(x)! - indeg.get(y)!)[0];
-      console.warn(`Reading order has a cycle; breaking it at ${next}`);
+      console.warn(`Graph layers have a cycle; breaking it at ${next}`);
     }
     done.add(next);
     topo.push(next);

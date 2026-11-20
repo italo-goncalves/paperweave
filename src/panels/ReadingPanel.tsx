@@ -21,7 +21,7 @@ export function ReadingPanel() {
     return (
       <div className="empty">
         <p>Your Trail is empty.</p>
-        <p>Pick a Result from the Results list to start. Every Node you open joins the Trail at its place in the Reading order.</p>
+        <p>Pick a Result from the Results list to start. Every Node you open joins the Trail at its place in the Paper order.</p>
       </div>
     );
   }

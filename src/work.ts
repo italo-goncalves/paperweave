@@ -1,5 +1,6 @@
 import yaml from "js-yaml";
 import { layoutWork, type GraphLayout } from "./graphLayout";
+import { paperOrder } from "./paperOrder";
 
 export const NODE_TYPES = ["result", "method", "concept", "primer", "context", "discussion", "conclusion"] as const;
 export type NodeType = (typeof NODE_TYPES)[number];
@@ -74,7 +75,12 @@ export interface Work {
   references: Record<string, Reference>;
   nodes: Record<string, WorkNode>;
   edges: Edge[];
-  /** Fixed Graph map positions and the Reading order. */
+  /** The order written in LaTeX, if the Work came from there (ADR 0003). */
+  order?: string[];
+  /** All Node ids in Paper order, and the index of each. */
+  paperOrder: string[];
+  paperRank: Record<string, number>;
+  /** Fixed Graph map positions. */
   layout: GraphLayout;
 }
 
@@ -133,7 +139,7 @@ function loadWork(dir: string): Work {
     figures[id] = { id, url: figureFiles[`${dir}/${f.file}`] ?? "", caption: f.caption ?? "" };
   }
 
-  const work: Omit<Work, "layout"> = {
+  const work: Omit<Work, "layout" | "paperOrder" | "paperRank"> = {
     id: manifest.id,
     title: manifest.title,
     authors: manifest.authors ?? [],
@@ -148,8 +154,11 @@ function loadWork(dir: string): Work {
     references,
     nodes,
     edges: edges.filter((e) => nodes[e.to]),
+    order: manifest.order,
   };
-  return { ...work, layout: layoutWork(work as Work) };
+  const order = paperOrder(work);
+  const paperRank = Object.fromEntries(order.map((id, i) => [id, i]));
+  return { ...work, paperOrder: order, paperRank, layout: layoutWork(work as Work) };
 }
 
 export const works: Work[] = Object.keys(manifests)
