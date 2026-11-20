@@ -13,8 +13,8 @@ Org2021:
   author: [Sample Organisation]
   year: 2021
   title: An organisational report
-  institution: Sample Institute
   number: TR-1
+  institution: Sample Institute
 Smith2020a:
   type: article
   author: ['Smith, John', 'Doe, Jane', 'Roe, Richard']

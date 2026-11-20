@@ -31,7 +31,7 @@ figures:
     caption: Markdown caption.
 ```
 
-- **`order`** is optional. When it is missing, the Paper order is computed: Context, Concepts (each followed by its Primers), Methods, Results, Discussions, Conclusion; within a type, what a Node depends on comes first. When present, it must list every Node once and follow that grouping. LaTeX → Work always writes it.
+- **`order`** is optional. When it is missing, the Paper order is computed: Context, Concepts (each followed by its Primers), Methods, Results, Discussions, Conclusion; within a type, what a Node depends on comes first. When present, it must list every Node once and follow that grouping. LaTeX → Work writes it when the order in which the Nodes were written differs from the computed one.
 
 ## references.yaml
 

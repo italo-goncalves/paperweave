@@ -53,9 +53,21 @@ def untex(s):
     return re.sub(r"[{}]", "", s)
 
 
+def _wrapped(s):
+    """True when the whole string is one {…} group, as for an organisation's name."""
+    if not (s.startswith("{") and s.endswith("}")):
+        return False
+    depth = 0
+    for i, c in enumerate(s):
+        depth += {"{": 1, "}": -1}.get(c, 0)
+        if depth == 0 and i < len(s) - 1:
+            return False
+    return True
+
+
 def _person(name):
     name = " ".join(name.split())
-    if name.startswith("{") and name.endswith("}") and name.count("{") == 1:
+    if _wrapped(name):
         return untex(name)  # an organisation
     name = untex(name)
     if "," in name:
@@ -144,6 +156,8 @@ def read_bib(text):
                 r[f] = int(value) if value.isdigit() else value
             elif f == "doi":
                 r[f] = re.sub(r"^https?://(dx\.)?doi\.org/", "", value)
+            elif f == "url":
+                r[f] = value
             elif f == "pages":
                 r[f] = untex(re.sub(r"(?<=\d)\s*-{1,2}\s*(?=\d)", "–", value))
             else:
@@ -190,5 +204,8 @@ def dump_references(refs):
     for key in sorted(refs):
         r = refs[key]
         entry = {k: r[k] for k in ["type", *FIELDS] if k in r and r[k] not in (None, "", [])}
+        for k in ("volume", "number", "pages", "edition"):  # always text, as BibTeX gives them back
+            if k in entry:
+                entry[k] = str(entry[k])
         out.append(yaml.safe_dump({key: entry}, allow_unicode=True, sort_keys=False, width=10**9, default_flow_style=None))
     return "".join(out)

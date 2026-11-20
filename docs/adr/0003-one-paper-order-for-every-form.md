@@ -11,5 +11,5 @@ A Work needs a linear order in three places: the Trail in the Reading panel, the
 ## Consequences
 
 - The Graph map keeps its layered layout. That is a layout, not an order, and it no longer defines the Trail.
-- Work → LaTeX writes Nodes in `order` when it is present and in the computed Paper order otherwise. LaTeX → Work always writes `order`.
+- Work → LaTeX writes Nodes in `order` when it is present and in the computed Paper order otherwise. LaTeX → Work writes `order` only when the written order differs from the computed one: the information is the same, and a Work without `order` then survives Work → LaTeX → Work byte for byte.
 - A Work written in files or in the app has no `order` unless its author adds one; the validator checks that any `order` lists every Node once and follows the grouping by type.

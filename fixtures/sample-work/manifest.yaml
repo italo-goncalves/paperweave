@@ -1,6 +1,8 @@
 id: sample-work
 title: A sample Work for PaperWeave's tests
-authors: [Ada Example, Jean-Paul Muñoz]
+authors:
+  - Ada Example
+  - Jean-Paul Muñoz
 year: 2026
 venue: PaperWeave fixtures
 doi: https://doi.org/10.0000/example
@@ -12,6 +14,7 @@ abstract: |
   It has a second paragraph with 50% of the "quoted" text and an_underscore.
 results: [result-main, result-side]
 conclusion: conclusion
+
 figures:
   fig-sample:
     file: figures/sample.png

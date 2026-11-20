@@ -10,6 +10,6 @@ A Work will be writable in three forms: the Work format (the files under `works/
 ## Consequences
 
 - Nothing exists in only one form. Anything the LaTeX class or the app can express must have a place in the Work format, and anything in the Work format must be writable in both. A feature added to one form is added to the other two in the same change.
-- Round trips are tested: for each sample Work, Work → LaTeX → Work and loading and saving in the app must both reproduce the original files byte for byte. The Work format therefore needs a canonical serialisation (key order, line wrapping, whitespace), or the tests compare parsed content instead.
+- Round trips are tested: for each sample Work, Work → LaTeX → Work and loading and saving in the app must both reproduce the original files byte for byte. The Work format therefore has a canonical serialisation (key order, quoting, whitespace, one spelling of each Markdown construct), written by `scripts/workwriter.py`; `scripts/test_round_trip.py` checks Work → LaTeX → Work.
 - The LaTeX class accepts only a defined subset of LaTeX. Custom macros, packages and layout commands outside it are rejected or flagged, never silently dropped.
 - Conversion carries declared Edges as Edges (ADR 0001); a LaTeX `\ref` or an Inline link never becomes one.

@@ -25,7 +25,13 @@ A Work can also be written as a LaTeX document in the PaperWeave class (`latex/p
 python -P scripts/work_to_latex.py works/deep-gp-networks build/latex/deep-gp-networks --pdf
 ```
 
-`--tier=gist|summary` prints a shorter Detail tier, and `--noprimers` leaves Primers out. References use PaperWeave's author-year style (ADR 0004), in the app through `src/references.ts` and in LaTeX through `latex/paperweave.bst`; `python -P scripts/test_references.py works/<id>` checks that the two agree, `scripts/test_paper_order.py` does the same for the Paper order, and `scripts/test_equations.py` for equation numbers at every Detail tier. `fixtures/sample-work` is a small versioned Work that uses every construct of the format, for these tests.
+`--tier=gist|summary` prints a shorter Detail tier, and `--noprimers` leaves Primers out. To read a LaTeX document in the class back into the Work format (anything outside the class is an error, never dropped):
+
+```bash
+python -P scripts/latex_to_work.py build/latex/deep-gp-networks works/deep-gp-networks
+```
+
+`python -P scripts/test_round_trip.py works/<id>` checks that Work → LaTeX → Work gives back every file byte for byte; with `--canonicalise` it first rewrites the Work in canonical form (`scripts/workwriter.py`). References use PaperWeave's author-year style (ADR 0004), in the app through `src/references.ts` and in LaTeX through `latex/paperweave.bst`; `python -P scripts/test_references.py works/<id>` checks that the two agree, `scripts/test_paper_order.py` does the same for the Paper order, and `scripts/test_equations.py` for equation numbers at every Detail tier. `fixtures/sample-work` is a small versioned Work that uses every construct of the format, for these tests.
 
 ## Reading
 
