@@ -154,6 +154,21 @@ def main(work_dir):
     for nid, (meta, _) in nodes.items():
         if not meta.get("edges") and incoming[nid] == 0:
             errors.append(f"{nid}: isolated node (no edges in or out)")
+    ref_types = {"article", "inproceedings", "incollection", "book", "thesis", "report", "misc"}
+    for key, r in refs.items():
+        # ADR 0004: structured fields, formatted by PaperWeave's style.
+        if not isinstance(r, dict) or "text" in r or "label" in r:
+            errors.append(f"references: {key} must hold fields, not a formatted label and text")
+            continue
+        if r.get("type") not in ref_types:
+            errors.append(f"references: {key} has unknown type '{r.get('type')}'")
+        if not isinstance(r.get("author"), list) or not r["author"]:
+            errors.append(f"references: {key} needs an author list")
+        for f in ("year", "title"):
+            if not r.get(f):
+                errors.append(f"references: {key} has no {f}")
+        if str(r.get("doi", "")).startswith("http"):
+            errors.append(f"references: {key} doi must be bare (10.xxxx/...), not a URL")
     for key in sorted(set(refs) - used_refs):
         notes.append(f"references: {key} is never cited")
 

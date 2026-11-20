@@ -46,7 +46,7 @@ Damianou2013:
   booktitle: International Conference on Artificial Intelligence and Statistics
   volume: 31
   pages: 207–215
-  doi: https://doi.org/...   # optional
+  doi: 10.1007/...           # optional, bare DOI; shown as https://doi.org/…
 ```
 
 ## Node files

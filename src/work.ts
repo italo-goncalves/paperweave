@@ -1,6 +1,7 @@
 import yaml from "js-yaml";
 import { layoutWork, type GraphLayout } from "./graphLayout";
 import { paperOrder } from "./paperOrder";
+import { formatReferences, type ReferenceFields } from "./references";
 
 export const NODE_TYPES = ["result", "method", "concept", "primer", "context", "discussion", "conclusion"] as const;
 export type NodeType = (typeof NODE_TYPES)[number];
@@ -55,6 +56,7 @@ export interface Figure {
   caption: string;
 }
 
+/** A reference as shown: label and text derived from its fields (ADR 0004). */
 export interface Reference {
   label: string;
   text: string;
@@ -122,7 +124,7 @@ function parseNode(id: string, text: string): { node: WorkNode; edges: Edge[] } 
 
 function loadWork(dir: string): Work {
   const manifest = yaml.load(manifests[`${dir}/manifest.yaml`]) as Record<string, any>;
-  const references = (yaml.load(referenceFiles[`${dir}/references.yaml`] ?? "{}") ?? {}) as Record<string, Reference>;
+  const references = formatReferences((yaml.load(referenceFiles[`${dir}/references.yaml`] ?? "{}") ?? {}) as Record<string, ReferenceFields>);
 
   const nodes: Record<string, WorkNode> = {};
   const edges: Edge[] = [];
