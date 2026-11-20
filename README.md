@@ -17,6 +17,16 @@ Check a Work after editing its files:
 python -P scripts/validate_work.py works/deep-gp-networks
 ```
 
+## LaTeX
+
+A Work can also be written as a LaTeX document in the PaperWeave class (`latex/paperweave.cls`, ADR 0002), which compiles to the Linear version: a standalone PDF of the graph in Paper order. To write a Work out as LaTeX and build its PDF (needs `latexmk`):
+
+```bash
+python -P scripts/work_to_latex.py works/deep-gp-networks build/latex/deep-gp-networks --pdf
+```
+
+`--tier=gist|summary` prints a shorter Detail tier, and `--noprimers` leaves Primers out. References use PaperWeave's author-year style (ADR 0004), in the app through `src/references.ts` and in LaTeX through `latex/paperweave.bst`; `python -P scripts/test_references.py works/<id>` checks that the two agree, and `scripts/test_paper_order.py` does the same for the Paper order.
+
 ## Reading
 
 - **Results list**: the Abstract, the Results in the author's order, and the Conclusion. Clicking an entry starts a new Trail. "Browse every Node" lists the whole Work by type.

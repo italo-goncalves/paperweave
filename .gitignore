@@ -14,3 +14,6 @@ sources/
 # Works and conversion tools: kept locally, not versioned
 works/
 tools/
+
+# Linear versions and other generated output
+build/

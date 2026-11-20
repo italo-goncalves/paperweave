@@ -49,7 +49,7 @@ def untex(s):
     s = re.sub(r"\{\\([`'^\"~=])\s*([A-Za-z])\}", repl, s)
     s = re.sub(r"\{\\([cv])\s+([A-Za-z])\}", repl, s)
     s = re.sub(r"\\([`'^\"~=])\{?([A-Za-z])\}?", repl, s)
-    s = s.replace("\\&", "&").replace("--", "–").replace("~", " ")
+    s = re.sub(r"\\([&%#_])", r"\1", s).replace("--", "–").replace("~", " ")
     return re.sub(r"[{}]", "", s)
 
 
@@ -161,8 +161,11 @@ def _bib_value(field, value):
             people.append(tex_name(p) if "," in p else "{" + tex_name(p) + "}")
         return " and ".join(people)
     s = str(value)
-    s = s.replace("&", "\\&").replace("–", "--") if field != "url" else s
-    return s
+    if field in ("url", "doi"):
+        return s
+    for ch in "&%#_":
+        s = s.replace(ch, "\\" + ch)
+    return s.replace("–", "--")
 
 
 def write_bib(refs):

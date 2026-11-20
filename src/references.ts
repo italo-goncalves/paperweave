@@ -45,18 +45,12 @@ function splitName(name: string): { family: string; given: string } {
   return i < 0 ? { family: name.trim(), given: "" } : { family: name.slice(0, i).trim(), given: name.slice(i + 1).trim() };
 }
 
-/** "Andreas C." → "A C"; "Jean-Paul" → "J-P". */
+/** "Andreas C." → "A C"; "Jean-Paul" → "J P", as BibTeX gives with a tie between initials. */
 function initials(given: string): string {
   return given
-    .split(/\s+/)
+    .split(/[\s-]+/)
     .filter(Boolean)
-    .map((part) =>
-      part
-        .split("-")
-        .filter(Boolean)
-        .map((p) => [...p][0])
-        .join("-"),
-    )
+    .map((p) => [...p][0])
     .join(" ");
 }
 
@@ -113,12 +107,15 @@ function link(r: ReferenceFields): string {
   return str(r.url);
 }
 
-/** Lowercase letters, digits and spaces only, for sorting the same way as BibTeX's purify$. */
+/**
+ * For sorting the same way as BibTeX's `purify$` then lowercase: hyphens, ties and white
+ * space become spaces, other ASCII symbols go, letters beyond ASCII stay as they are.
+ */
 export function purify(s: string): string {
   return s
-    .replace(/[-~]/g, " ")
-    .replace(/[^A-Za-z0-9 ]/g, "")
-    .toLowerCase();
+    .replace(/[-~\s]/g, " ")
+    .replace(/[\x00-\x1f\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]/g, "")
+    .replace(/[A-Z]/g, (c) => c.toLowerCase());
 }
 
 /** Labels and texts for every reference of a Work, with a/b suffixes for equal labels. */
