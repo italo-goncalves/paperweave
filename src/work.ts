@@ -65,6 +65,7 @@ export interface Work {
   authors: string[];
   year?: number;
   venue?: string;
+  doi?: string;
   code?: string;
   abstract: string;
   results: string[];
@@ -138,6 +139,7 @@ function loadWork(dir: string): Work {
     authors: manifest.authors ?? [],
     year: manifest.year,
     venue: manifest.venue,
+    doi: manifest.doi,
     code: manifest.code,
     abstract: manifest.abstract ?? "",
     results: manifest.results ?? [],

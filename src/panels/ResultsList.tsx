@@ -59,6 +59,11 @@ export function ResultsList() {
           ) : null;
         })}
       </details>
+      {work.doi && (
+        <p className="code-link">
+          DOI: <a href={work.doi} target="_blank" rel="noreferrer">{work.doi}</a>
+        </p>
+      )}
       {work.code && (
         <p className="code-link">
           Code: <a href={work.code} target="_blank" rel="noreferrer">{work.code}</a>

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ReaderProvider, useReader } from "./state";
 import { works, TIERS, type Tier } from "./work";
 import { DEFAULT_LAYOUT, PANEL_TITLES, PanelLayout, useLayout, type PanelId } from "./Layout";
@@ -9,17 +9,31 @@ import { FigurePanel, Lightbox } from "./panels/FigurePanel";
 
 const TIER_LABELS: Record<Tier, string> = { gist: "Gist", summary: "Summary", full: "Full" };
 
+/** The Work named by `?work=<id>` in the address, or the first one. */
+function initialWorkId() {
+  const wanted = new URLSearchParams(window.location.search).get("work");
+  return works.find((w) => w.id === wanted)?.id ?? works[0]?.id;
+}
+
 export function App() {
-  const work = works[0];
+  const [workId, setWorkId] = useState(initialWorkId);
+  const work = works.find((w) => w.id === workId) ?? works[0];
   if (!work) return <p className="empty">No Work found in /works.</p>;
+  const chooseWork = (id: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("work", id);
+    window.history.replaceState(null, "", url);
+    setWorkId(id);
+  };
+  // Keyed by Work so the Trail and Detail tiers start fresh when switching.
   return (
-    <ReaderProvider work={work}>
-      <Shell />
+    <ReaderProvider key={work.id} work={work}>
+      <Shell onChooseWork={chooseWork} />
     </ReaderProvider>
   );
 }
 
-function Shell() {
+function Shell({ onChooseWork }: { onChooseWork: (id: string) => void }) {
   const { work, state, dispatch } = useReader();
   const [layout, setLayout] = useLayout();
 
@@ -52,7 +66,17 @@ function Shell() {
     <div className="app">
       <header className="topbar">
         <span className="brand">PaperWeave</span>
-        <span className="topbar-work" title={work.title}>{work.title}</span>
+        {works.length > 1 ? (
+          <select className="topbar-work work-select" aria-label="Work" title={work.title} value={work.id} onChange={(e) => onChooseWork(e.target.value)}>
+            {works.map((w) => (
+              <option key={w.id} value={w.id}>
+                {w.title}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className="topbar-work" title={work.title}>{work.title}</span>
+        )}
         <div className="topbar-controls">
           <label className="ctl">
             <span>Detail</span>

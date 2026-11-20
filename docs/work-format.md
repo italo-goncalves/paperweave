@@ -19,6 +19,7 @@ title: Uncertainty propagation in deep Gaussian process networks
 authors: [Ítalo Gomes Gonçalves, Florian Wellmann]
 year: 2023
 venue: Mathematical Geosciences
+doi: https://doi.org/10.1007/s11004-025-10187-4   # optional, shown as a link
 abstract: |
   Markdown text.
 results: [result-vein, result-gold, result-solar]   # Results list order, set by the author
