@@ -1,0 +1,12 @@
+node_modules/
+dist/
+
+# LaTeX build by-products in paper sources
+*.aux
+*.log
+*.out
+*.blg
+*.synctex.gz
+
+# Original paper sources: kept locally, not versioned
+sources/
