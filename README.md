@@ -8,7 +8,7 @@ PaperWeave turns a paper into a **Work**: a graph of typed **Nodes** (Results, M
 
 ![The deep GP paper in PaperWeave: the Results list, a Result at Summary tier, its Neighbourhood on the Graph map, and the Figure panel](docs/screenshots/overview.png)
 
-<sub>Screenshots show *Uncertainty propagation in deep Gaussian process networks* (Gonçalves and Wellmann, Mathematical Geosciences), converted from its LaTeX source.</sub>
+<sub>The screenshots show [*Uncertainty Propagation in Deep Gaussian Process Networks*](https://doi.org/10.1007/s11004-025-10187-4) (Gonçalves and Wellmann, *Mathematical Geosciences* 57, 2025), an open-access paper under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), converted into a Work from its LaTeX source. The Gists, Summaries, Primers and Edges were added in the conversion; see [LICENSE-docs.md](LICENSE-docs.md).</sub>
 
 ## Status
 
@@ -161,3 +161,9 @@ runs the checks on the sample Work: validation, Paper order (the app's and the P
 ## Contributing
 
 Ideas, issues and pull requests are welcome. [GLOSSARY.md](GLOSSARY.md) fixes the vocabulary; please use its terms, and add a term there before using a new one. Larger design decisions are recorded as ADRs in [docs/adr/](docs/adr/). Similar projects and how PaperWeave differs from them are in [docs/related-work.md](docs/related-work.md).
+
+## License
+
+The code is under the [MIT License](LICENSE). The documentation and screenshots are under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); [LICENSE-docs.md](LICENSE-docs.md) says which files are which, and credits the paper shown in the screenshots.
+
+A Work you convert holds the paper's text and figures, so it carries the paper's own license and copyright, not this repository's. Keep a converted Work private unless the paper's license allows sharing it.
