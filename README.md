@@ -17,6 +17,10 @@ Check a Work after editing its files:
 python -P scripts/validate_work.py works/deep-gp-networks
 ```
 
+## Converting a paper
+
+To turn an existing paper into a Work, your own or someone else's that you want to read this way, ask Claude Code in this repository to convert it, giving the LaTeX source if you have it or the PDF. The `convert-paper` skill (`.claude/skills/convert-paper/`) keeps the paper's wording in the Full tiers, drafts the Gists, Summaries, Primers and Edges, has a separate agent check the result against the paper, and writes `sources/<paper>/review.md`: a checklist of everything drafted, changed, left out or doubtful. Papers and Works stay in the unversioned `sources/` and `works/`.
+
 ## LaTeX
 
 A Work can also be written as a LaTeX document in the PaperWeave class (`latex/paperweave.cls`, ADR 0002), which compiles to the Linear version: a standalone PDF of the graph in Paper order. To write a Work out as LaTeX and build its PDF (needs `latexmk`):
