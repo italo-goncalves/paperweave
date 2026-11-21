@@ -31,6 +31,12 @@ python -P scripts/work_to_latex.py works/deep-gp-networks build/latex/deep-gp-ne
 python -P scripts/latex_to_work.py build/latex/deep-gp-networks works/deep-gp-networks
 ```
 
+To wrap an existing paper written in another class, first let the helper rewrite what it can; it marks every place that needs a decision with `\todo{…}` (red in the PDF, rejected by the importer). Then wrap the text in Node environments, add Gists, Summaries and Edges, and resolve each marker:
+
+```bash
+python -P scripts/prepare_legacy.py paper.tex build/latex/my-paper --id=my-paper
+```
+
 `python -P scripts/test_round_trip.py works/<id>` checks that Work → LaTeX → Work gives back every file byte for byte; with `--canonicalise` it first rewrites the Work in canonical form (`scripts/workwriter.py`). References use PaperWeave's author-year style (ADR 0004), in the app through `src/references.ts` and in LaTeX through `latex/paperweave.bst`; `python -P scripts/test_references.py works/<id>` checks that the two agree, `scripts/test_paper_order.py` does the same for the Paper order, and `scripts/test_equations.py` for equation numbers at every Detail tier. `fixtures/sample-work` is a small versioned Work that uses every construct of the format, for these tests.
 
 ## Reading

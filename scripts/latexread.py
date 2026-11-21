@@ -115,6 +115,8 @@ def _inline(s, where, notes=None):
             out.append('"')
             i += 2
             continue
+        if c == "%":
+            raise FormatError(f"{where}: comments are not allowed inside a Node (write \\% for a percent sign), near {s[max(0, i - 30):i + 30]!r}")
         if c in "{}~":
             raise FormatError(f"{where}: unexpected '{c}' near {s[max(0, i - 30):i + 30]!r}")
         out.append(c)

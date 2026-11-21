@@ -191,6 +191,11 @@
 %% Notes in tiers that are not printed are dropped.
 \newcount\pw@notecount
 \let\pw@notelist\@empty
+\let\pw@id\@empty
+
+%% \todo{...} marks what scripts/prepare_legacy.py could not decide when wrapping an
+%% existing paper. It shows in red so the draft can be read; LaTeX → Work rejects it.
+\newcommand\todo[1]{\textcolor{red}{\textbf{[TODO:}~\detokenize{#1}\textbf{]}}}
 \renewcommand\footnote[1]{%
   \ifpw@discarding\else
     \global\advance\pw@notecount\@ne
