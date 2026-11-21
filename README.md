@@ -37,6 +37,8 @@ To wrap an existing paper written in another class, first let the helper rewrite
 python -P scripts/prepare_legacy.py paper.tex build/latex/my-paper --id=my-paper
 ```
 
+The helper also imports the paper's `.bib` through `scripts/import_bib.py`, which can be run on its own (`python -P scripts/import_bib.py library.bib works/<id>/references.yaml --cited=works/<id>`). It keeps only cited entries and repairs reference-manager quirks, such as a conference paper exported as an article or a date in the issue field. It then lists what a person must check: DOIs (often another paper's), names that look like run-together initials, and abbreviated booktitles. `scripts/test_import_bib.py` covers these repairs.
+
 `python -P scripts/test_round_trip.py works/<id>` checks that Work → LaTeX → Work gives back every file byte for byte; with `--canonicalise` it first rewrites the Work in canonical form (`scripts/workwriter.py`). References use PaperWeave's author-year style (ADR 0004), in the app through `src/references.ts` and in LaTeX through `latex/paperweave.bst`; `python -P scripts/test_references.py works/<id>` checks that the two agree, `scripts/test_paper_order.py` does the same for the Paper order, and `scripts/test_equations.py` for equation numbers at every Detail tier. `fixtures/sample-work` is a small versioned Work that uses every construct of the format, for these tests.
 
 ## Reading

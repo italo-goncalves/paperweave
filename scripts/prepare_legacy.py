@@ -26,6 +26,8 @@ Marked \\todo:
   \\ref to a figure or section            no numbers in a Work: reword, or \\nodelink
   \\citep[...][...]{...}, \\citeauthor     no citation prefixes or parts in a Work
   \\url without http(s)                   needs a full address
+References: the paper's .bib (or --bib) goes through scripts/import_bib.py, which keeps
+the cited entries, repairs reference-manager quirks and lists what to check.
 Dropped, and listed in the report: comments, \\thanks, \\institute, \\date, \\newpage,
 acknowledgements and everything after them.
 """
@@ -37,6 +39,8 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
+from bibtex import write_bib  # noqa: E402
+from import_bib import cited_keys, import_bib  # noqa: E402
 from latexread import group, optional  # noqa: E402
 
 IMAGE_EXTS = ["", ".pdf", ".png", ".jpg", ".jpeg", ".eps"]
@@ -81,6 +85,7 @@ class Preparer:
         self.figures = {}  # id -> (file, caption)
         self.figure_labels = {}  # old label -> id
         self.operators = []
+        self.bib_report = None
 
     # ---- math -------------------------------------------------------------
     def fix_math(self, tex):
@@ -291,11 +296,6 @@ class Preparer:
                 continue
             shutil.copy2(found, out / "figures" / found.name)
             declared.append(f"\\declarefigure{{{fid}}}{{figures/{found.name}}}{{{cap}}}")
-        bib_path = Path(bib) if bib else (self.tex_path.parent / f"{bibname.group(1)}.bib" if bibname else None)
-        if bib_path and bib_path.is_file():
-            shutil.copy2(bib_path, out / "references.bib")
-        else:
-            self.report.append("no .bib file found: add references.bib")
         for f in ("paperweave.cls", "paperweave.bst"):
             shutil.copy2(HERE.parent / "latex" / f, out / f)
 
@@ -311,12 +311,26 @@ class Preparer:
             head += ["\\begin{abstract}", abstract_tex, "\\end{abstract}"]
         doc = "\n".join(head) + "\n\n\\begin{document}\n\\maketitle\n\n" + text + "\n\n\\bibliography{references}\n\\end{document}\n"
         (out / "main.tex").write_text(doc, encoding="utf-8", newline="\n")
+
+        # References: the paper's .bib, cleaned by import_bib, keeping only what is cited.
+        bib_path = Path(bib) if bib else (self.tex_path.parent / f"{bibname.group(1)}.bib" if bibname else None)
+        if bib_path and bib_path.is_file():
+            refs, fixed, check = import_bib(bib_path.read_text(encoding="utf-8"), cited_keys(out / "main.tex"))
+            (out / "references.bib").write_text(write_bib(refs), encoding="utf-8", newline="\n")
+            self.bib_report = (len(refs), fixed, check)
+        else:
+            self.report.append("no .bib file found: add references.bib")
         return out
 
     def summary(self):
         lines = [f"equations labelled: {len(self.equations)} ({', '.join(f'{a} -> {b}' for a, b in self.equations.items())})",
                  f"figures declared: {len(self.figures)}"]
         lines += self.report
+        if self.bib_report:
+            n, fixed, check = self.bib_report
+            lines.append(f"references: {n} cited entries written to references.bib (scripts/import_bib.py)")
+            lines += [f"  fixed: {f}" for f in fixed]
+            lines += [f"  to check: {c}" for c in check]
         total = sum(self.todos.values())
         lines.append(f"\\todo markers: {total}" + "".join(f"\n  {n} {k}" for k, n in self.todos.most_common()))
         return "\n".join(lines)

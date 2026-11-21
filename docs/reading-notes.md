@@ -29,7 +29,22 @@ The document imported on the first attempt and passed the validator. It survives
   - the paper's typos corrected ("the variance of is input" is still there in the wrapped Work).
 - Two Nodes, `covariance-stationarity` and `network-design`, have no Full tier in the wrapped Work. In the hand-converted Work they were put together from sentences scattered across the paper, and no single passage of the source matches them. Conversely, `disc-missing-piece` gains a Full tier, the paper's own paragraph, where the hand-converted Work had only a Summary.
 
-**Suggests:** the class and the helper make the LaTeX side cheap. The mechanical step does most of the rewriting, and every place that needs a decision is marked, so none can slip through. The real cost of wrapping is not markup but authoring the graph: choosing the Node boundaries and writing about 28 Gists, 24 Summaries and 60 Edges. Here that work was reused rather than done, so this note does not measure it. Splitting `align` blocks loses the alignment of the equals signs, which reads worse in the PDF than in the original. Nodes that synthesise an idea spread across a paper cannot be wrapped, only written. The wrapped references came from the hand-converted Work; reading the paper's own `library.bib` still needs the BibTeX import helper.
+**Suggests:** the class and the helper make the LaTeX side cheap. The mechanical step does most of the rewriting, and every place that needs a decision is marked, so none can slip through. The real cost of wrapping is not markup but authoring the graph: choosing the Node boundaries and writing about 28 Gists, 24 Summaries and 60 Edges. Here that work was reused rather than done, so this note does not measure it. Splitting `align` blocks loses the alignment of the equals signs, which reads worse in the PDF than in the original. Nodes that synthesise an idea spread across a paper cannot be wrapped, only written. The wrapped references came from the hand-converted Work.
+
+**Later, the paper's own references:** `scripts/import_bib.py` read the paper's Mendeley export (`library.bib`, 39 entries) and kept the 34 cited ones. It repaired the entries with one obvious fix:
+- 1 conference paper exported as an article, and 1 thesis exported as an article in the journal "Thesis",
+- 3 dates in the issue field,
+- 5 urls that only repeated the DOI,
+- an HTML entity in a url.
+
+The resulting Work validates, survives the round trip and formats the same in the app and the bst.
+
+On its own, the import matches only 7 of the 34 hand-migrated entries. Most of the remaining differences are judgment calls the helper now points at rather than makes:
+- 4 DOIs that belong to other papers (Damianou2013, Hensman2013, Paciorek2003, Rasmussen2006, all on conference papers, theses or books),
+- an affiliation exported as an author ("Sheffield, Uk") and run-together initials ("Lawrence, Nd"),
+- abbreviated proceedings titles ("NIPS", "Aistats").
+
+DOIs on journal articles look right but cannot be checked offline, so they are listed for a spot check. Hand migration dropped them all. The deep GP Work keeps its hand-checked references.
 
 ## 2026-11-20 · Converting a paper straight from its PDF
 
