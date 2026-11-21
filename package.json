@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "validate": "python tools/validate_work.py works/deep-gp-networks"
+    "validate": "python -P scripts/validate_work.py",
+    "test": "python -P scripts/run_tests.py"
   },
   "dependencies": {
     "cytoscape": "3.33.1",

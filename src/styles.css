@@ -228,8 +228,10 @@ a { color: var(--type-method); }
 }
 
 /* Equation labels: numbered display equations, references and their popover. */
-.math-numbered { position: relative; padding-right: 3.5em; border-radius: 4px; }
-.eq-number { position: absolute; right: 0.4em; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+/* The equation scrolls on its own when it is too wide; its number stays beside it. */
+.math-numbered { display: flex; align-items: center; gap: 0.6em; overflow: visible; border-radius: 4px; }
+.math-numbered > .katex-display { flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; }
+.eq-number { flex: none; padding-right: 0.4em; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .eq-ref { white-space: nowrap; }
 .eq-ref-missing { color: #b91c1c; }
 .eq-flash { animation: eq-flash 1.6s ease-out; }

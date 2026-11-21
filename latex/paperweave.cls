@@ -336,7 +336,7 @@
 \renewcommand\maketitle{%
   \begingroup\centering
   {\LARGE\bfseries\@title\par}\vspace{0.8em}
-  {\large\def\and{, }\@author\par}\vspace{0.4em}
+  {\large\def\and{\unskip, }\@author\par}\vspace{0.4em}
   {\small\pw@venue\ifx\pw@workyear\@empty\else\ifx\pw@venue\@empty\else\ \textperiodcentered\ \fi\pw@workyear\fi\par}
   \ifx\pw@doi\@empty\else{\small\url{\pw@doi}\par}\fi
   \ifx\pw@code\@empty\else{\small Code: \url{\pw@code}\par}\fi
