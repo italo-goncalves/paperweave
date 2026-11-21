@@ -179,10 +179,32 @@
     \ifnum\pw@choice=0 \ifnum\pw@tiernum>1 \ifdefined\pw@summary \pw@choice=1 \fi\fi\fi
   \fi
   \ifdefined\pw@summary \ifnum\pw@choice=1 \pw@body\pw@summary\else\pw@discard\pw@summary\fi\fi
-  \ifdefined\pw@full \ifnum\pw@choice=2 \pw@body\pw@full\else\pw@discard\pw@full\fi\fi}
+  \ifdefined\pw@full \ifnum\pw@choice=2 \pw@body\pw@full\else\pw@discard\pw@full\fi\fi
+  \pw@printnotes}
 \def\pw@body#1{\par\nobreak #1\par}
 \newif\ifpw@discarding
 \def\pw@discard#1{\setbox\z@\vbox{\pw@discardingtrue #1}}
+
+%% ---- Notes -----------------------------------------------------------------
+%% \footnote{...} is a Note: a numbered mark in the text, with the Notes of a Node listed
+%% after its printed tier (or at the end of a Primer's box), not at the foot of the page.
+%% Notes in tiers that are not printed are dropped.
+\newcount\pw@notecount
+\let\pw@notelist\@empty
+\renewcommand\footnote[1]{%
+  \ifpw@discarding\else
+    \global\advance\pw@notecount\@ne
+    \edef\pw@thisnote{\the\pw@notecount}%
+    \textsuperscript{\hyperlink{note:\pw@id:\pw@thisnote}{\pw@thisnote}}%
+    \xdef\pw@notelist{\unexpanded\expandafter{\pw@notelist}%
+      \noexpand\pw@noteitem{\pw@thisnote}{\unexpanded{#1}}}%
+  \fi}
+\def\pw@noteitem#1#2{\par\nobreak\noindent\hypertarget{note:\pw@id:#1}{}\textsuperscript{#1}\,#2}
+\newcommand\pw@printnotes{%
+  \ifx\pw@notelist\@empty\else
+    \par\vspace{0.5em}{\footnotesize\setlength{\parskip}{0.2em}\noindent\rule{4em}{0.4pt}\par\nobreak\pw@notelist\par}%
+  \fi
+  \global\let\pw@notelist\@empty\global\pw@notecount\z@}
 
 \newcommand\gist[1]{%
   \pw@auxwrite\pw@setgist{\pw@id}{#1}%
@@ -206,7 +228,7 @@
    \else\begin{pw@primerbox}\hypertarget{node:#2}{}%
      {\small\sffamily\bfseries\color{pw@primer}PRIMER}\par\nobreak
      {\large\bfseries\boldmath #3\par}\nobreak\fi}
-  {\ifpw@suppress\egroup\else\end{pw@primerbox}\fi}
+  {\ifpw@suppress\egroup\else\pw@printnotes\end{pw@primerbox}\fi}
 
 \newcommand\includeprimer[1]{%
   \ifpw@noprimers\pw@suppresstrue\fi

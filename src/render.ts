@@ -20,6 +20,19 @@ function citation(work: Work, key: string, narrative: boolean): string {
 interface Placeholders {
   math: { tex: string; display: boolean; label?: string }[];
   figures: string[];
+  /** Note numbers in marker order, and each Note's text from its `[^n]: text` line. */
+  notes: string[];
+  noteText: Record<string, string>;
+}
+
+const emptyPlaceholders = (): Placeholders => ({ math: [], figures: [], notes: [], noteText: {} });
+
+/** Removes Note definitions (`[^n]: text` lines) from a tier, keeping their text. */
+function takeNotes(src: string, ph: Placeholders): string {
+  return src.replace(/\r\n/g, "\n").replace(/^\[\^(\d+)\]: (.+)$\n?/gm, (_, n: string, text: string) => {
+    ph.noteText[n] = text;
+    return "";
+  });
 }
 
 function preprocess(work: Work, src: string, ph: Placeholders): string {
@@ -41,6 +54,12 @@ function preprocess(work: Work, src: string, ph: Placeholders): string {
   s = s.replace(/\$([^$\n]+?)\$/g, (_, tex) => {
     ph.math.push({ tex, display: false });
     return `MATHPH${ph.math.length - 1}X`;
+  });
+
+  // Note markers: [^n], with the definition taken out by takeNotes.
+  s = s.replace(/\[\^(\d+)\]/g, (_, n: string) => {
+    ph.notes.push(n);
+    return `NOTEPH${ph.notes.length - 1}X`;
   });
 
   // Figures on their own line.
@@ -98,6 +117,13 @@ function postprocess(work: Work, html: string, ph: Placeholders): string {
     const m = ph.math[Number(i)];
     return renderMath(m.tex, m.display);
   });
+  // A Note is a numbered marker holding its text, which NotePopover shows on demand.
+  html = html.replace(/NOTEPH(\d+)X/g, (_, i) => {
+    const n = ph.notes[Number(i)];
+    const text = ph.noteText[n];
+    if (text === undefined) return `<sup class="note-ref note-missing">[${escapeHtml(n)}]</sup>`;
+    return `<sup class="note-ref" data-note="${escapeHtml(n)}" tabindex="0" role="button" aria-label="Note ${escapeHtml(n)}">${escapeHtml(n)}<span class="note-body" hidden>${renderInline(work, text)}</span></sup>`;
+  });
   return html;
 }
 
@@ -108,12 +134,12 @@ export function figureHtml(work: Work, id: string): string {
 }
 
 export function renderMarkdown(work: Work, src: string): string {
-  const ph: Placeholders = { math: [], figures: [] };
-  return postprocess(work, md.render(preprocess(work, src, ph)), ph);
+  const ph = emptyPlaceholders();
+  return postprocess(work, md.render(preprocess(work, takeNotes(src, ph), ph)), ph);
 }
 
 export function renderInline(work: Work, src: string): string {
-  const ph: Placeholders = { math: [], figures: [] };
+  const ph = emptyPlaceholders();
   return postprocess(work, md.renderInline(preprocess(work, src, ph)), ph);
 }
 

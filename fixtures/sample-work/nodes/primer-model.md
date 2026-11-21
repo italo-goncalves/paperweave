@@ -6,7 +6,7 @@ edges:
   explains: [concept-model]
 ---
 
-**The idea.** A model maps inputs to outputs, with a "noise" term.
+**The idea.** A model maps inputs to outputs, with a "noise" term.[^1]
 
 - First point, with *emphasis*.
 - Second point, citing @Smith2020a.
@@ -14,3 +14,5 @@ edges:
 $$
 z = 2
 $$ {#eq-primer}
+
+[^1]: Usually Gaussian, as in Equation [[#eq-primer]].

@@ -10,7 +10,8 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).parent))
-from workformat import paper_group  # noqa: E402
+import latexform  # noqa: E402
+from workformat import paper_group, split_tiers  # noqa: E402
 
 TYPES = {"result", "method", "concept", "primer", "context", "discussion", "conclusion"}
 ANY = TYPES
@@ -89,6 +90,18 @@ def main(work_dir):
                 errors.append(f"{nid}: unknown level-2 headings {bad}")
             if [h for h in TIERS if h in headings] != headings:
                 errors.append(f"{nid}: tiers out of order or repeated: {headings}")
+
+        # Body syntax, including Notes: [^n] needs a definition `[^n]: text` in the same tier,
+        # and Notes are allowed in a Summary, a Full tier or a Primer, never in a Gist.
+        sections = {"primer": body} if ntype == "primer" else split_tiers(body)
+        for tier, text in sections.items():
+            try:
+                if tier == "gist":
+                    latexform.inline(text.strip())
+                else:
+                    latexform.blocks(text, f"{nid} ({tier})")
+            except latexform.FormatError as e:
+                errors.append(str(e) if str(e).startswith(nid) else f"{nid} ({tier}): {e}")
 
         edge_targets = set()
         for key, targets in (meta.get("edges") or {}).items():

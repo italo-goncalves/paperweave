@@ -31,10 +31,10 @@ class WriteError(ValueError):
     pass
 
 
-def canonical_markdown(text, where):
+def canonical_markdown(text, where, notes=True):
     """Body Markdown in its one canonical spelling: the form LaTeX → Work gives back
     (for example `|---|` for a left-aligned table column, `| |` for an empty cell)."""
-    return latexread.blocks(latexform.blocks(text, where), where)
+    return latexread.blocks(latexform.blocks(text, where, notes), where, notes)
 
 
 def scalar(v):
@@ -67,7 +67,7 @@ def manifest_text(m):
         elif key in FLOW_LISTS:
             out.append(f"{key}: {flow(v)}")
         elif key == "abstract":
-            out.append(literal("abstract", canonical_markdown(v, "abstract")))
+            out.append(literal("abstract", canonical_markdown(v, "abstract", notes=False)))
         elif key == "figures":
             figs = ["", "figures:"]
             for fid, f in v.items():
@@ -100,7 +100,7 @@ def node_text(nid, meta, body):
             raise WriteError(f"{nid}: text before '## Gist' would be lost")
         tiers = split_tiers(body)
         text = "\n\n".join(
-            f"## {t.capitalize()}\n{canonical_markdown(tiers[t], nid)}" for t in ("gist", "summary", "full") if t in tiers
+            f"## {t.capitalize()}\n{canonical_markdown(tiers[t], nid, notes=t != "gist")}" for t in ("gist", "summary", "full") if t in tiers
         )
     return "---\n" + "\n".join(head) + "\n---\n\n" + text + "\n"
 

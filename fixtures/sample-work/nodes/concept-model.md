@@ -23,7 +23,7 @@ $$
 y = f(x) + \varepsilon
 $$ {#eq-model}
 
-with noise $\varepsilon$. Its likelihood is
+with noise $\varepsilon$.[^1] Its likelihood is
 
 $$\log p(y) = -\tfrac{1}{2} y^\top \boldsymbol\Sigma^{-1} y + c$$ {#eq-likelihood}
 
@@ -32,3 +32,5 @@ and an unnumbered identity
 $$
 a = a
 $$
+
+[^1]: The noise is *independent* of $x$.

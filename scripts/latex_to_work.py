@@ -138,7 +138,7 @@ def read_document(folder):
                 break
             if env != "abstract":
                 raise FormatError(f"{where}: only the abstract environment is allowed in the preamble")
-            manifest["abstract"] = latexread.blocks(src.until("\\end{abstract}"), "abstract") + "\n"
+            manifest["abstract"] = latexread.blocks(src.until("\\end{abstract}"), "abstract", notes=False) + "\n"
         elif cmd == "workid":
             manifest["id"] = src.arg()
         elif cmd == "title":

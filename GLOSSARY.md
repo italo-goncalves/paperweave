@@ -38,6 +38,10 @@ _Avoid_: Figure node, asset
 An author-chosen name that numbers a display equation and lets other Nodes refer to it; numbers run across the Work in Paper order.
 _Avoid_: Equation tag, anchor
 
+**Note**:
+A short aside attached to a point in a Node's Summary, Full tier or Primer, shown on demand when reading and listed after its Node in the Linear version; each tier has its own Notes.
+_Avoid_: Footnote, endnote, sidenote
+
 ### Edge types
 
 **uses**: Result or Method → Method.

@@ -241,3 +241,18 @@ a { color: var(--type-method); }
 }
 .eq-popover .katex-display { margin: 0.4em 0; }
 .eq-popover-meta { font-size: 0.8em; color: var(--text-muted); }
+
+/* Notes: a numbered marker; the text shows in a popover on hover, pinned on click. */
+.note-ref {
+  cursor: pointer; color: var(--type-method); font-weight: 600; font-size: 0.72em;
+  padding: 0 0.15em; border-radius: 3px; line-height: 0;
+}
+.note-ref:hover, .note-ref:focus-visible { background: color-mix(in srgb, var(--type-method) 14%, transparent); outline: none; }
+.note-missing { color: #b91c1c; cursor: default; }
+.note-popover {
+  position: fixed; z-index: 50; max-width: min(90vw, 420px); pointer-events: none;
+  background: var(--bg-panel); color: inherit; border: 1px solid var(--border);
+  border-radius: 6px; box-shadow: 0 6px 24px rgb(0 0 0 / 0.18); padding: 0.45em 0.8em;
+  font-size: 0.9em; line-height: 1.45;
+}
+.note-popover.note-pinned { pointer-events: auto; border-color: var(--type-method); }

@@ -14,6 +14,7 @@ Each construct has exactly one LaTeX form, so LaTeX → Work can invert it (ADR 
   $…$ / $$…$$             $…$ / \\[…\\], contents untouched
   $$…$$ {#eq-x}           \\begin{equation}\\label{eq-x}…\\end{equation}
   [[#eq-x]]               \\eqref{eq-x}
+  [^n] and `[^n]: text`   \\footnote{text}, a Note (definitions close their tier)
 
 Anything else in a body is an error, never dropped silently.
 """
@@ -24,8 +25,10 @@ SPECIALS = {"\\": r"\textbackslash{}", "{": r"\{", "}": r"\}", "%": r"\%", "&": 
             "_": r"\_", "~": r"\textasciitilde{}", "^": r"\textasciicircum{}", "$": r"\$"}
 URL_SPECIALS = {"%": r"\%", "#": r"\#", "\\": r"\textbackslash{}", "{": r"\{", "}": r"\}"}
 
+NOTE_DEF = re.compile(r"\[\^(\d+)\]: (.+)")
 INLINE = re.compile(
-    r"(?P<eqref>\[\[#(?P<eqlabel>eq-[a-z0-9-]+)\]\])"
+    r"(?P<note>\[\^(?P<nnum>\d+)\])"
+    r"|(?P<eqref>\[\[#(?P<eqlabel>eq-[a-z0-9-]+)\]\])"
     r"|(?P<link>\[\[(?P<lid>[a-z0-9-]+)(?:\|(?P<ltext>[^\]]*))?\]\])"
     r"|(?P<citep>\[(?P<ckeys>@" + KEY + r"(?:;\s*@" + KEY + r")*)\])"
     r"|(?P<citet>(?:(?<=^)|(?<=[\s(]))@(?P<tkey>" + KEY + r"))"
@@ -57,12 +60,24 @@ def escape_url(url):
     return "".join(URL_SPECIALS.get(c, c) for c in url)
 
 
-def _inline(text):
+def _inline(text, notes=None):
+    """`notes` maps Note numbers to their text where Notes are allowed (None elsewhere);
+    each used Note is set to None so a second use is caught."""
     out, i = [], 0
     for m in INLINE.finditer(text):
         out.append(escape(text[i:m.start()]))
         i = m.end()
-        if m["eqref"]:
+        if m["note"]:
+            n = m["nnum"]
+            if notes is None:
+                raise FormatError(f"Notes are allowed only in a Summary, a Full tier or a Primer: {text[:60]!r}")
+            if n not in notes:
+                raise FormatError(f"Note [^{n}] has no definition '[^{n}]: …'")
+            if notes[n] is None:
+                raise FormatError(f"Note [^{n}] is used twice")
+            out.append(f"\\footnote{{{_inline(notes[n])}}}")
+            notes[n] = None
+        elif m["eqref"]:
             out.append(f"\\eqref{{{m['eqlabel']}}}")
         elif m["link"]:
             t = m["ltext"]
@@ -77,9 +92,9 @@ def _inline(text):
         elif m["href"]:
             out.append(f"\\href{{{escape_url(m['hurl'])}}}{{{_inline(m['htext'])}}}")
         elif m["bold"]:
-            out.append(f"\\textbf{{{_inline(m['btext'])}}}")
+            out.append(f"\\textbf{{{_inline(m['btext'], notes)}}}")
         elif m["em"]:
-            out.append(f"\\emph{{{_inline(m['etext'])}}}")
+            out.append(f"\\emph{{{_inline(m['etext'], notes)}}}")
     out.append(escape(text[i:]))
     return "".join(out)
 
@@ -112,50 +127,74 @@ def inline(text):
     return _restore_math(_inline(protected), spans)
 
 
-def _table(lines, where):
+
+def _table(lines, where, notes=None):
     rows = [[c.strip() for c in l.strip().strip("|").split("|")] for l in lines]
     if len(rows) < 2 or not all(re.fullmatch(r":?-{3,}:?", c) for c in rows[1]):
         raise FormatError(f"{where}: a table needs a header row and a separator row")
     spec = "".join("c" if c.startswith(":") and c.endswith(":") else "r" if c.endswith(":") else "l" for c in rows[1])
-    body = [" & ".join(_inline(c) for c in rows[0]) + r" \\", r"\midrule"]
+    body = [" & ".join(_inline(c, notes) for c in rows[0]) + r" \\", r"\midrule"]
     for r in rows[2:]:
         if len(r) != len(spec):
             raise FormatError(f"{where}: table row has {len(r)} cells, expected {len(spec)}")
-        body.append(" & ".join(_inline(c) for c in r) + r" \\")
+        body.append(" & ".join(_inline(c, notes) for c in r) + r" \\")
     return [f"\\begin{{pwtable}}{{{spec}}}", *body, r"\end{pwtable}"]
 
 
-def blocks(text, where="body"):
-    """A Detail tier (or Primer, Abstract, caption) of Markdown as LaTeX lines, line for line."""
+def blocks(text, where="body", notes=True):
+    """A Detail tier (or Primer, Abstract) of Markdown as LaTeX lines, line for line. With
+    `notes`, lines `[^n]: text` define Notes, each written as \\footnote where `[^n]` is used."""
     protected, spans = _protect_math(text.strip("\n"))
     lines = protected.split("\n")
+    defs = None
+    if notes:
+        defs, kept = {}, []
+        for line in lines:
+            m = NOTE_DEF.fullmatch(line)
+            if not m:
+                kept.append(line)
+            elif m.group(1) in defs:
+                raise FormatError(f"{where}: Note [^{m.group(1)}] is defined twice")
+            else:
+                defs[m.group(1)] = m.group(2)
+        while kept and not kept[-1].strip():
+            kept.pop()
+        lines = kept
     out, i = [], 0
-    while i < len(lines):
-        line = lines[i]
-        if line.startswith("|"):
-            j = i
-            while j < len(lines) and lines[j].startswith("|"):
-                j += 1
-            out += _table(lines[i:j], where)
-            i = j
-            continue
-        if line.startswith("- "):
-            out.append(r"\begin{itemize}")
-            while i < len(lines) and lines[i].startswith("- "):
-                out.append(r"\item " + _inline(lines[i][2:]))
-                i += 1
-            out.append(r"\end{itemize}")
-            continue
-        m = re.fullmatch(r"!\[\[([a-z0-9-]+)\]\]\s*", line)
-        if m:
-            out.append(f"\\showfigure{{{m.group(1)}}}")
-        elif line.startswith("#### "):
-            out.append(f"\\subsubsection*{{{_inline(line[5:])}}}")
-        elif line.startswith("### "):
-            out.append(f"\\subsection*{{{_inline(line[4:])}}}")
-        elif re.match(r"(#{1,2}|#{5,}) |\d+\. |\* |> |    |\t|```", line):
-            raise FormatError(f"{where}: unsupported Markdown line {line[:60]!r}")
-        else:
-            out.append(_inline(line))
-        i += 1
+    try:
+        while i < len(lines):
+            line = lines[i]
+            if line.startswith("|"):
+                j = i
+                while j < len(lines) and lines[j].startswith("|"):
+                    j += 1
+                out += _table(lines[i:j], where, defs)
+                i = j
+                continue
+            if line.startswith("- "):
+                out.append(r"\begin{itemize}")
+                while i < len(lines) and lines[i].startswith("- "):
+                    out.append(r"\item " + _inline(lines[i][2:], defs))
+                    i += 1
+                out.append(r"\end{itemize}")
+                continue
+            m = re.fullmatch(r"!\[\[([a-z0-9-]+)\]\]\s*", line)
+            if m:
+                out.append(f"\\showfigure{{{m.group(1)}}}")
+            elif line.startswith("#### "):
+                out.append(f"\\subsubsection*{{{_inline(line[5:], defs)}}}")
+            elif line.startswith("### "):
+                out.append(f"\\subsection*{{{_inline(line[4:], defs)}}}")
+            elif re.match(r"(#{1,2}|#{5,}) |\d+\. |\* |> |    |\t|```", line):
+                raise FormatError(f"{where}: unsupported Markdown line {line[:60]!r}")
+            else:
+                out.append(_inline(line, defs))
+            i += 1
+    except FormatError as e:
+        if str(e).startswith(where):
+            raise
+        raise FormatError(f"{where}: {e}") from None
+    unused = [n for n, d in (defs or {}).items() if d is not None]
+    if unused:
+        raise FormatError(f"{where}: Note definitions never used: {', '.join(unused)}")
     return _restore_math("\n".join(out), spans)

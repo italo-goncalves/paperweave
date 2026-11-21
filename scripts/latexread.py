@@ -57,7 +57,9 @@ def unescape_url(s):
     return s
 
 
-def _inline(s, where):
+def _inline(s, where, notes=None):
+    """`notes` collects the text of each \\footnote as a Note, numbered in order, where Notes
+    are allowed; it is None elsewhere."""
     out, i = [], 0
     while i < len(s):
         c = s[i]
@@ -80,6 +82,12 @@ def _inline(s, where):
                 text, i = optional(s, i, where)
                 nid, i = group(s, i, where)
                 out.append(f"[[{nid}]]" if text is None else f"[[{nid}|{_inline(text, where)}]]")
+            elif name == "footnote":
+                if notes is None:
+                    raise FormatError(f"{where}: Notes (\\footnote) are allowed only in a Summary, a Full tier or a Primer")
+                text, i = group(s, i, where)
+                notes.append(_inline(text, where))
+                out.append(f"[^{len(notes)}]")
             elif name == "eqref":
                 label, i = group(s, i, where)
                 out.append(f"[[#{label}]]")
@@ -99,7 +107,7 @@ def _inline(s, where):
             elif name in ("textbf", "emph"):
                 inner, i = group(s, i, where)
                 mark = "**" if name == "textbf" else "*"
-                out.append(mark + _inline(inner, where) + mark)
+                out.append(mark + _inline(inner, where, notes) + mark)
             else:
                 raise FormatError(f"{where}: \\{name} is not allowed here (near {s[max(0, i - 40):i + 20]!r})")
             continue
@@ -143,16 +151,18 @@ def inline(text, where="text"):
     return _restore_math(_inline(protected, where), spans)
 
 
-def _row(line, where):
+def _row(line, where, notes=None):
     if not line.endswith(" \\\\"):
         raise FormatError(f"{where}: a table row must end with ' \\\\': {line[:60]!r}")
     cells = re.split(r"(?<!\\)&", line[:-3])
-    md = [_inline(c.strip(), where) for c in cells]
+    md = [_inline(c.strip(), where, notes) for c in cells]
     return "|" + "|".join(f" {c} " if c else " " for c in md) + "|"
 
 
-def blocks(text, where="body"):
-    """LaTeX lines written by latexform.blocks back to Markdown, line for line."""
+def blocks(text, where="body", notes=True):
+    """LaTeX lines written by latexform.blocks back to Markdown, line for line. With `notes`,
+    each \\footnote becomes [^n] and its definition `[^n]: text` closes the tier."""
+    defs = [] if notes else None
     protected, spans = _protect_math(text.strip("\n"))
     lines = protected.split("\n")
     out, i = [], 0
@@ -163,7 +173,7 @@ def blocks(text, where="body"):
             while i < len(lines) and lines[i] != r"\end{itemize}":
                 if not lines[i].startswith("\\item "):
                     raise FormatError(f"{where}: only one-line \\item entries are allowed in a list: {lines[i][:60]!r}")
-                out.append("- " + _inline(lines[i][6:], where))
+                out.append("- " + _inline(lines[i][6:], where, defs))
                 i += 1
             if i == len(lines):
                 raise FormatError(f"{where}: itemize is not closed")
@@ -178,19 +188,21 @@ def blocks(text, where="body"):
                 i += 1
             if i == len(lines) or len(rows) < 2 or rows[1] != r"\midrule":
                 raise FormatError(f"{where}: a pwtable needs a header row, \\midrule and \\end{{pwtable}}")
-            out.append(_row(rows[0], where))
+            out.append(_row(rows[0], where, defs))
             out.append("|" + "|".join({"l": "---", "c": ":---:", "r": "---:"}[c] for c in spec) + "|")
-            out += [_row(r, where) for r in rows[2:]]
+            out += [_row(r, where, defs) for r in rows[2:]]
             i += 1
             continue
         m = re.fullmatch(r"\\showfigure\{([a-z0-9-]+)\}", line)
         if m:
             out.append(f"![[{m.group(1)}]]")
         elif line.startswith("\\subsection*{") and line.endswith("}"):
-            out.append("### " + _inline(line[13:-1], where))
+            out.append("### " + _inline(line[13:-1], where, defs))
         elif line.startswith("\\subsubsection*{") and line.endswith("}"):
-            out.append("#### " + _inline(line[16:-1], where))
+            out.append("#### " + _inline(line[16:-1], where, defs))
         else:
-            out.append(_inline(line, where))
+            out.append(_inline(line, where, defs))
         i += 1
+    if defs:
+        out += ["", *(f"[^{n}]: {d}" for n, d in enumerate(defs, 1))]
     return _restore_math("\n".join(out), spans)

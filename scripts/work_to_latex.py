@@ -74,7 +74,7 @@ def main_tex(work, tier="full", noprimers=False):
     for fid, fig in (m.get("figures") or {}).items():
         out.append(f"\\declarefigure{{{fid}}}{{{fig['file']}}}{{{inline(fig.get('caption', ''))}}}")
     if m.get("abstract"):
-        out += ["\\begin{abstract}", blocks(m["abstract"], "abstract"), "\\end{abstract}"]
+        out += ["\\begin{abstract}", blocks(m["abstract"], "abstract", notes=False), "\\end{abstract}"]
     out += ["", "\\begin{document}", "\\maketitle", ""]
     for nid in work.paper_order():
         out.append(f"\\includeprimer{{{nid}}}\n" if work.type_of(nid) == "primer" else node_tex(work, nid))
